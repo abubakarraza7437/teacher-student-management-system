@@ -4,12 +4,14 @@ from sqlalchemy.orm import Session
 from app.database import Base, engine, get_db
 from app.models.user import User as UserModel
 from app.schemas.user import UserCreate, UserRead
+from passlib.context import CryptContext
+
 
 app = FastAPI()
 
 Base.metadata.create_all(bind=engine)
 
-
+pass_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 @app.post("/create-user", response_model=UserRead)
 def create_user(
         data: UserCreate,
@@ -23,10 +25,11 @@ def create_user(
             status_code=400,
             detail="A user with this email already exists"
         )
+    hashed_password = pass_context.hash(data.password)
     new_user = UserModel(
         name=data.name,
         email=data.email,
-        password=data.password,
+        password=hashed_password,
         role=data.role)
     db.add(new_user)
     db.commit()
