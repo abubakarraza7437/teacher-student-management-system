@@ -1,34 +1,12 @@
-from fastapi import FastAPI, HTTPException
-from fastapi.params import Depends
-from sqlalchemy.orm import Session
-from app.database import Base, engine, get_db
-from app.models.user import User as UserModel
-from app.schemas.user import UserCreate, UserRead
+from fastapi import FastAPI
 
-app = FastAPI()
+# from app.database import Base, engine
+from app.routers import user
+from app.routers import class_room
 
-Base.metadata.create_all(bind=engine)
+app = FastAPI(title="Teacher-Student Management System")
 
+app.include_router(user.router)
+app.include_router(class_room.router)
 
-@app.post("/create-user", response_model=UserRead)
-def create_user(
-        data: UserCreate,
-        db: Session = Depends(get_db)
-):
-    existing_user = (db.query(UserModel).
-                     filter(UserModel.email == data.email).
-                     first())
-    if existing_user:
-        raise HTTPException(
-            status_code=400,
-            detail="A user with this email already exists"
-        )
-    new_user = UserModel(
-        name=data.name,
-        email=data.email,
-        password=data.password,
-        role=data.role)
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    return new_user
+# Base.metadata.create_all(bind=engine)
