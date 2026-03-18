@@ -3,6 +3,7 @@ from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+
 class Hash:
 
     @staticmethod
@@ -15,7 +16,6 @@ class Hash:
 
 
 class RoleChecker:
-
 
     def __init__(self, allowed_roles: list[str]):
         self.allowed_roles = allowed_roles

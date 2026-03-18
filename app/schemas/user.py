@@ -12,9 +12,21 @@ class UserRole(str, Enum):
 
 
 class UserCreate(BaseModel):
-    name: str = Field(..., min_length=2, max_length=100, description="User's name")
-    email: EmailStr = Field(..., description="User's email")
-    password: str = Field(..., min_length=6, description="User's password")
+    name: str = Field(
+        ...,
+        min_length=2,
+        max_length=100,
+        description="User's name"
+    )
+    email: EmailStr = Field(
+        ...,
+        description="User's email"
+    )
+    password: str = Field(
+        ...,
+        min_length=6,
+        description="User's password"
+    )
     role: UserRole
 
 
