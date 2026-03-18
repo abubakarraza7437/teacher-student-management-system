@@ -25,4 +25,9 @@ class ResponseClass(BaseModel):
 
 
 class AddStudent(BaseModel):
-    email: List[str] = Field(...)
+    class_name: str = Field(...)
+    emails: List[str] = Field(...)
+
+
+class ReadStudent(BaseModel):
+    class_name: str = Field(...)
