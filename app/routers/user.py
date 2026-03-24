@@ -6,11 +6,22 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import (
-    Hash, allow_admin, allow_teacher, allow_student,
+    Hash,
+    allow_admin,
+    allow_teacher,
+    allow_student,
 )
 from app.models.user import User as UserModel
-from app.schemas.user import UserCreate, UserResponse, Token
-from app.token import create_access_token, get_current_user
+from app.schemas.user import (
+    UserCreate,
+    UserResponse,
+    Token,
+    ChangeUserPasswordRequest
+)
+from app.token import (
+    create_access_token,
+    get_current_user
+)
 
 router = APIRouter(tags=["user"])
 
@@ -23,8 +34,8 @@ CurrentUser = Annotated[UserModel, Depends(get_current_user)]
     status_code=201,
 )
 def create_user(
-    data: UserCreate,
-    db: Session = Depends(get_db),
+        data: UserCreate,
+        db: Session = Depends(get_db),
 ):
     existing_user = db.query(UserModel).filter(
         UserModel.email == data.email
@@ -49,14 +60,14 @@ def create_user(
 
 @router.post("/login", response_model=Token)
 def login(
-    data: OAuth2PasswordRequestForm = Depends(),
-    db: Session = Depends(get_db),
+        data: OAuth2PasswordRequestForm = Depends(),
+        db: Session = Depends(get_db),
 ):
     user = db.query(UserModel).filter(
         UserModel.email == data.username
     ).first()
     if not user or not Hash.verify_password(
-        data.password, user.password
+            data.password, user.password
     ):
         raise HTTPException(
             status_code=401,
@@ -76,11 +87,40 @@ def read_current_user(current_user: CurrentUser):
 
 @router.get("/users", response_model=list[UserResponse])
 def get_all_users(
-    current_user: CurrentUser,
-    db: Session = Depends(get_db),
+        current_user: CurrentUser,
+        db: Session = Depends(get_db),
 ):
     allow_admin(current_user)
     return db.query(UserModel).all()
+
+
+@router.put("/users/change_password")
+def change_user_password(
+        current_user: CurrentUser,
+        data: ChangeUserPasswordRequest,
+        db: Session = Depends(get_db),
+):
+    old_password = data.old_password
+    new_password = data.new_password
+    if not Hash.verify_password(old_password, current_user.password):
+        raise HTTPException(
+            status_code=401,
+            detail='Invalid password'
+        )
+    if Hash.verify_password(
+            data.new_password,
+            current_user.password
+    ):
+        raise HTTPException(
+            status_code=200,
+            detail="New password must be different"
+        )
+    user = db.query(UserModel).filter(
+        UserModel.email == current_user.email
+    ).first()
+    user.password = Hash.hash_password(new_password)
+    db.commit()
+    return {'message': 'Password changed'}
 
 
 @router.get("/teacher/dashboard")
