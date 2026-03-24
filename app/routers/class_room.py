@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import allow_teacher
+from app.dependencies import allow_teacher, HandlePassword
 from app.models.class_room import Class
 from app.models.user import User
 from app.schemas.class_room import CreateClass, AddStudent, ReadStudent
@@ -104,3 +104,34 @@ def get_students(
     allow_teacher(current_user)
     students = db.query(Class).filter(Class.name == data.class_name).all()
     return students
+
+
+@router.post("/teacher", status_code=201)
+def create_student(
+    data: CreateClass,
+    current_user: CurrentUser,
+    db: Session = Depends(get_db),
+):
+
+    # ensure only teachers can create students
+    allow_teacher(current_user)
+
+    # check if user with email already exists
+    existing = db.query(User).filter(User.email == data.email).first()
+    if existing:
+        raise HTTPException(
+            status_code=400,
+            detail="User with this email already exists"
+        )
+    password = HandlePassword.generate_password()
+    # create student user
+    student = User(
+        email=data.email,
+        name=data.name,
+        role="student",
+        password=password,
+    )
+    db.add(student)
+    db.commit()
+    db.refresh(student)
+    return student

@@ -43,6 +43,11 @@ class UserResponse(BaseModel):
         from_attributes = True
 
 
+class ChangeUserPasswordRequest(BaseModel):
+    old_password: str
+    new_password: str
+
+
 class Token(BaseModel):
     access_token: str
     token_type: str
