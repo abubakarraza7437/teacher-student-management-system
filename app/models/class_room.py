@@ -55,6 +55,7 @@ class Class(Base):
     students: Mapped[List[User]] = relationship(
         "User",
         secondary=class_students,
+        back_populates="classes",
     )
 
     created_at: Mapped[datetime] = mapped_column(

@@ -94,7 +94,7 @@ def add_students(
     return result
 
 
-@router.get("/student")
+@router.get("/class_student")
 def get_students(
         current_user: CurrentUser,
         data: ReadStudent,
