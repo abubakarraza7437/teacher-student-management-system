@@ -7,6 +7,7 @@ from alembic import context
 from app.database import Base
 from app.models.user import User  # noqa: F401
 from app.models.class_room import Class  # noqa: F401
+from app.models.profiles import StudentProfile, TeacherProfile   # noqa: F401
 
 
 # this is the Alembic Config object, which provides

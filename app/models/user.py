@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from uuid import uuid4, UUID
 
 from sqlalchemy import Enum
-from sqlalchemy.orm import mapped_column, Mapped
+from sqlalchemy.orm import mapped_column, Mapped, relationship
 
 from app.database import Base
 
@@ -34,3 +34,14 @@ class User(Base):
         onupdate=lambda: datetime.now(timezone.utc),
         nullable=False,
     )
+
+
+try:
+    from app.models.class_room import class_students
+    User.classes = relationship(
+        "Class",
+        secondary=class_students,
+        back_populates="students"
+    )
+except Exception:
+    pass

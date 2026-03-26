@@ -27,6 +27,12 @@ class UserCreate(BaseModel):
         min_length=6,
         description="User's password"
     )
+    salary: int = Field(
+        description="To register Teacher"
+    )
+    dues: int = Field(
+        description="To register student"
+    )
     role: UserRole
 
 
